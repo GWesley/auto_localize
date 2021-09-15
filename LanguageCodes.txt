@@ -1,0 +1,11 @@
+# Country Coding mapping
+# Name  |  Google Country Code (translate API)  | iOS Country Code (.lproj directory name)
+English en en
+French	fr fr
+German	de de
+ChineseSimplified	zh-CN zh-Hans
+ChineseTraditional	zh-TW zh-Hant
+Japanese	ja ja
+Spanish	es es
+Italian	it it
+Korean ko ko
