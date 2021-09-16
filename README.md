@@ -3,7 +3,7 @@ Auto generate iOS Localizable.strings for Xcode with google translate
 
 # how to run
 1. pip3 install googletrans
-2. put origin Localizable.strings file in folder
+2. put your origin Localizable.strings file in folder
 3. python3 strings.py
 
 # how to set origin languge
