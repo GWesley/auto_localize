@@ -1,5 +1,5 @@
 # auto_localize
-Auto generate iOS Localizable.strings for Xcode with google translate
+Auto translate Localizable.strings for multiple languages in Xcode
 
 # how to run
 1. pip3 install googletrans
