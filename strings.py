@@ -192,7 +192,10 @@ def translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
 
     (translation, success) = translateSourceText(sourceText, translateTargetCode)
 
-    writeToFile(stringName, translation, outputTargetCode)
+    if success:
+        # Only save translated lines
+        writeToFile(stringName, translation, outputTargetCode)
+    #end if
 
     return success
 #end def
