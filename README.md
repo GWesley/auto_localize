@@ -1,4 +1,4 @@
-# auto_localize
+# translate
 Auto translate `Localizable.strings` for multiple languages in Xcode using Google Translate or DeepL. Supports optionally translating missing translations only, given an existing target translation.
 
 # Usage
