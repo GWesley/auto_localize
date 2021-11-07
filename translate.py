@@ -140,6 +140,7 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
 
     totalLinesTranslated = 0
     totalLinesNeeded = 0
+    totalSkipped = 0
     for translationTuple in originLines:
         if translationNeeded(translationTuple, translateTargetCode, existingOutputTranslations):
             totalLinesNeeded += 1
@@ -148,6 +149,7 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
                 totalLinesTranslated += 1
             #end if
         else:
+            totalSkipped += 1
             if args.v == "1":
                 print("  ....... skipping already translated key: %s" % (translationTuple['key']))
             #end if
@@ -158,7 +160,7 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
         print("WARNING: Total lines translated for %s: %s. Original source count: %s" % (translateFriendlyName, totalLinesTranslated, totalLinesNeeded))
     else:
         if len(args.d.strip()) != 0:
-            print("SUCCESS: New lines translated for %s: %s" % (translateFriendlyName, totalLinesTranslated))
+            print("SUCCESS: New lines translated for %s: %s, skipped: %s" % (translateFriendlyName, totalLinesTranslated, totalSkipped))
         else:
             print("SUCCESS: Total lines translated for %s: %s" % (translateFriendlyName, totalLinesTranslated))
         #endif
