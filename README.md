@@ -28,32 +28,46 @@ optional arguments:
 get a chance to correct / modify the original string and try again. When used with the `-d` option, this means that 
 it will only try and translate the missing strings (i.e. the strings that failed to translate the firs time.)
 
-# how to specify custom path to Localizable.strings
+## how to specify custom path to Localizable.strings
 `python3 translate.py -f /some/path/to/Localizable.strings`
 
-# how to use DeepL
+## how to use DeepL
 Google Translate is used by default. To switch to DeepL you must also specify an authentication token, like so:
 
 `python3 translate.py -t deepl -a AUTH_TOKEN_HERE`
 
-# how to set origin languge
+## how to set origin languge
 you can use `-o` to set your origin language,
 
 for example `python3 translate.py -o fr`,
 
 the default origin is english
 
-# how to add more languages
+## how to add more languages
 update `LanguageCodes.txt` to add or remove support languages
 
-# how to translate only missing translations
+## how to translate only missing translations
 To translate only the strings that have not been translated already, you need to specify the path to the root directory where existing translations reside (i.e. which contains directories such as `fr.lproj` etc):
 
 `python3 translate.py -d ~/path/to/app/resources`
 
 This will then ignore translating any line that already exists. 
 
-# how to enable verbose printing
+## how to enable verbose printing
 This will print additional information as it translates.
 `python3 translate.py -v`
 
+# extract_missing_strings.py
+
+We already have tools that extract missing localizable strings from code. However, at times you end up with partially incomplete translations
+across the different translations you support. For instance
+a string may be translated in French but not in Italian, and you may have forgotten to add the same string to your default language (e.g. en.lproj assuming that's
+the default locale).
+
+This script helps with this. It scans all supported languages, including your default locale (english if not specified), for
+any string which was not found in another translation. It then extracts only the keys and stores them into `Localizable.strings`, ignoring any
+that were found in your default locale's `Localizable.strings` file.
+
+This way your default locale's `Localizable.strings` file remains the source of truth. You can then
+use `translate.py` to translate any string from this file that does not exist in one of the supported languages, 
+using the `-d` option to translate only the missing strings.
