@@ -4,6 +4,7 @@ import os
 import os.path
 import argparse
 import deepl
+import codecs, chardet
 from googletrans import Translator
 
 parser = argparse.ArgumentParser()
@@ -15,11 +16,43 @@ parser.add_argument("-d", default="", help="For delta translations. Set the path
 parser.add_argument("-v", default="1", help="Verbose")
 args = parser.parse_args()
 
+format_encoding = 'UTF-16'
+
 def createOutputDirectoryIfNotExists(fileName):
     if not os.path.exists(os.path.dirname(fileName)):
         os.makedirs(os.path.dirname(fileName))
     #end if
 #end def
+
+def _unescape_key(s):
+    return s.replace('\\\n', '')
+#end def
+
+def _unescape(s):
+    s = s.replace('\\\n', '')
+    return s.replace('\\"', '"').replace(r'\n', '\n').replace(r'\r', '\r')
+#end def
+
+def _get_content_from_file(filename, encoding='UTF-16'):
+    f = open(filename, 'rb')
+    try:
+        content = f.read()
+        if chardet.detect(content)['encoding'].startswith(format_encoding):
+            #f = f.decode(format_encoding)
+            encoding = format_encoding
+        else:
+            #f = f.decode(default_encoding)
+            encoding = 'utf-8'
+        f.close()
+        f = codecs.open(filename, 'r', encoding=encoding)
+        return f.read()
+    except IOError as e:
+        print("Error opening file %s with encoding %s: %s" %\
+                (filename, format_encoding, e.message))
+    except Exception as e:
+        print("Unhandled exception: %s" % e.message)
+    finally:
+        f.close()
 
 def readTranslations(fileName):
     """
@@ -36,36 +69,44 @@ def readTranslations(fileName):
     #endif
 
     readLines = []
-    with open(fileName, 'r') as stringsFile:
-        for line in stringsFile:
-            # Ignore empty lines
-            if len(line.strip()) == 0:
-                continue
-            # endif
 
-            # Ignore lines we cannot translate
-            matchSource = re.search(r'\"(.*)\"(.*)\"(.*)\"', line)
-            if matchSource:
-                stringName = matchSource.group(1)
-                sourceText = matchSource.group(3)
-
-                translationTuple = (stringName, sourceText)
-
-                readLines.append(translationTuple)
-            # else:
-            #     if args.v == '1':
-            #         print("   ignoring translation line: %s" % (line))
-            #     # end if
-            # end if
-        # end for
-    # end with
-
-    return readLines
+    stringset = []
+    f = _get_content_from_file(filename=fileName)
+    if f.startswith(u'\ufeff'):
+        f = f.lstrip(u'\ufeff')
+    # regex for finding all comments in a file
+    cp = r'(?:/\*(?P<comment>(?:[^*]|(?:\*+[^*/]))*\**)\*/)'
+    p = re.compile(
+        r'(?:%s[ \t]*[\n]|[\r\n]|[\r]){0,1}(?P<line>(("(?P<key>[^"\\]*(?:\\.[^"\\]*)*)")|(?P<property>\w+))\s*=\s*"(?P<value>[^"\\]*(?:\\.[^"\\]*)*)"\s*;)' % cp,
+        re.DOTALL | re.U)
+    # c = re.compile(r'\s*/\*(.|\s)*?\*/\s*', re.U)
+    c = re.compile(r'//[^\n]*\n|/\*(?:.|[\r\n])*?\*/', re.U)
+    ws = re.compile(r'\s+', re.U)
+    end = 0
+    start = 0
+    for i in p.finditer(f):
+        start = i.start('line')
+        end_ = i.end()
+        key = i.group('key')
+        comment = i.group('comment') or ''
+        if not key:
+            key = i.group('property')
+        value = i.group('value')
+        while end < start:
+            m = c.match(f, end, start) or ws.match(f, end, start)
+            if not m or m.start() != end:
+                print("Invalid syntax: %s" % \
+                      f[end:start])
+            end = m.end()
+        end = end_
+        key = _unescape_key(key)
+        stringset.append({'key': key, 'value': _unescape(value), 'comment': comment})
+    return stringset
 #end def
 
 def writeToFile(sourceText, translatedText, outputTargetCode):
     outputFileName = "output/" + outputTargetCode + ".lproj/Localizable.strings"
-    with open(outputFileName, "a") as myfile:
+    with open(outputFileName, "a", encoding="utf-8") as myfile:
         createOutputDirectoryIfNotExists(outputFileName)
         contentToWrite = "\"" + sourceText + "\" = \"" + translatedText + "\";\n"
         myfile.write(contentToWrite)
@@ -125,11 +166,11 @@ def translationNeeded(translationTuple, translateTargetCode, existingTranslation
     :param existingTranslations:  existing target translations
     :return: True if needed, False if translation was found in the original target.
     """
-    stringName = translationTuple[0]
-    sourceText = translationTuple[1]
+    stringName = translationTuple['key']
+    sourceText = translationTuple['value']
 
     for existingTranslation in existingTranslations:
-        existingKey = existingTranslation[0]
+        existingKey = existingTranslation['key']
         if existingKey == stringName:
             return False
         #end if
@@ -146,8 +187,8 @@ def translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
     :param translateTargetCode:  target language
     :param outputTargetCode:  output target code
     """
-    stringName = translationTuple[0]
-    sourceText = translationTuple[1]
+    stringName = translationTuple['key']
+    sourceText = translationTuple['value']
 
     (translation, success) = translateSourceText(sourceText, translateTargetCode)
 
@@ -196,13 +237,19 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
             #end if
         else:
             if args.v == "1":
-                print("  ... translation NOT needed for key: %s" % (translationTuple[0]))
+                print("  ....... skipping already translated key: %s" % (translationTuple['key']))
             #end if
         #end if
     #end for
 
     if totalLinesNeeded != totalLinesTranslated:
-        print("    WARNING: Total lines translated: %s. Original source count: %s" % (totalLinesTranslated, totalLinesNeeded))
+        print("WARNING: Total lines translated for %s: %s. Original source count: %s" % (translateFriendlyName, totalLinesTranslated, totalLinesNeeded))
+    else:
+        if len(args.d.strip()) != 0:
+            print("SUCCESS: New lines translated for %s: %s" % (translateFriendlyName, totalLinesTranslated))
+        else:
+            print("SUCCESS: Total lines translated for %s: %s" % (translateFriendlyName, totalLinesTranslated))
+        #endif
     #end if
 #end def
 
@@ -241,6 +288,8 @@ with open('LanguageCodes.txt', 'r') as supportedLangCodeFile:
         #end if
 
         translateFile(translateFriendlyName, useCode, outputTargetCode)
+
+        print("\n\n")
     #end for
 #end def
 
