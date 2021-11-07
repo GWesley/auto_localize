@@ -170,9 +170,10 @@ if str(args.t).strip().lower() == "deepl":
 #endif
 
 # Read and cache origin language once
-print("Reading source language: %s" % (args.f))
+originPath = os.path.expanduser(args.f.strip())
+print("Reading source language: %s" % (originPath))
 
-originLines = readTranslations(args.f)
+originLines = readTranslations(originPath)
 
 print("Total lines in source: %s\n" % (len(originLines)))
 
