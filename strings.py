@@ -68,12 +68,11 @@ def readTranslations(fileName):
         return []
     #endif
 
-    readLines = []
-
     stringset = []
     f = _get_content_from_file(filename=fileName)
     if f.startswith(u'\ufeff'):
         f = f.lstrip(u'\ufeff')
+    #end if
     # regex for finding all comments in a file
     cp = r'(?:/\*(?P<comment>(?:[^*]|(?:\*+[^*/]))*\**)\*/)'
     p = re.compile(
@@ -89,15 +88,19 @@ def readTranslations(fileName):
         end_ = i.end()
         key = i.group('key')
         comment = i.group('comment') or ''
+
         if not key:
             key = i.group('property')
+        #end if
+
         value = i.group('value')
         while end < start:
             m = c.match(f, end, start) or ws.match(f, end, start)
             if not m or m.start() != end:
-                print("Invalid syntax: %s" % \
-                      f[end:start])
+                print("Invalid syntax: %s" % f[end:start])
+            #end if
             end = m.end()
+        #end while
         end = end_
         key = _unescape_key(key)
         stringset.append({'key': key, 'value': _unescape(value), 'comment': comment})
