@@ -8,3 +8,4 @@
 
 "Hello" = "Hello";
 "World" = "World";
+"The calendar '%@' does not support meetings." = "The calendar '%@' does not support meetings.";

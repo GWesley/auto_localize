@@ -3,11 +3,12 @@ import re
 import os
 import os.path
 import argparse
+import deepl
 from googletrans import Translator
 
-translator = Translator()
-
 parser = argparse.ArgumentParser()
+parser.add_argument("-t", default="google", help="set the translator to use. -t deepl for DeepL, -t google for Google Translate. Defaults to google. For DeepL must also specify auth key with -a ")
+parser.add_argument("-a", default="", help="set auth key to use for DeepL")
 parser.add_argument("-f", default="Localizable.strings", help="set the path to the original Localizable.strings to read keys from")
 parser.add_argument("-o", default="en", help="set the origin locale for auto translation, default is english")
 parser.add_argument("-d", default="", help="For delta translations. Set the path to the root directory where existing localized translations exist. If specified, this path will be used to check if a line / key has already been translated and skip translating that line. This way only the keys that do not exist in the existing destination file will be translated.")
@@ -78,8 +79,21 @@ def translateSourceText(sourceText, translateTargetCode):
     :param translateTargetCode: target language (google translation code)
     :return:
     """
+
+    translatedText = sourceText
+
     try:
-        obj = translator.translate(sourceText, src=args.o, dest=translateTargetCode)
+        if str(args.t).strip().lower() == "deepl":
+            deeplTranslator = deepl.Translator(args.a)
+            result = deeplTranslator.translate_text(sourceText, source_lang=args.o, target_lang=translateTargetCode)
+
+            translatedText = result.text
+        else:
+            googleTranslator = Translator()
+            obj = googleTranslator.translate(sourceText, src=args.o, dest=translateTargetCode)
+
+            translatedText = obj.text
+        #end if
     except Exception as e:
         if args.v == '1':
             print("   FAILED to translate for %s: %s = %s" % (translateTargetCode, sourceText, e))
@@ -87,7 +101,18 @@ def translateSourceText(sourceText, translateTargetCode):
         return (sourceText, False)
     #end try
 
-    return (obj.text, True)
+    # Deepl can produce translations with double quotes, we need to escape those properly
+    translatedText = translatedText.replace("\"", "\\\"")
+
+    # Some basic validation to confirm translation did not get rid of formatters in source text
+    totalFormattersInSource = sourceText.count('%')
+    totalFormattersInOutput = translatedText.count('%')
+
+    if totalFormattersInSource != totalFormattersInOutput:
+        print("    WARNING. Formatters don't match in: %s => %s (lang: %s)" % (sourceText, translatedText, translateTargetCode))
+    #end if
+
+    return (translatedText, True)
 #end def
 
 def translationNeeded(translationTuple, translateTargetCode, existingTranslations):
@@ -181,6 +206,10 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
     #end if
 #end def
 
+if str(args.t).strip().lower() == "deepl":
+    print("Using DeepL translator")
+#endif
+
 # Read and cache origin language once
 print("Reading source language: %s" % (args.f))
 
@@ -197,10 +226,21 @@ with open('LanguageCodes.txt', 'r') as supportedLangCodeFile:
 
         targetArray = targetLine.split()
         translateFriendlyName = targetArray[0]
-        translateTargetCode = targetArray[1]
-        outputTargetCode = targetArray[2]
+        googleTranslateTargetCode = targetArray[1]
+        deeplTranslateTargetCode = targetArray[2]
+        outputTargetCode = targetArray[3]
 
-        translateFile(translateFriendlyName, translateTargetCode, outputTargetCode)
+        if deeplTranslateTargetCode.strip() == "-" and str(args.t).strip().lower() == "deepl":
+            print("Ignoring non-supported language for DeepL: %s" % (translateFriendlyName))
+            continue
+        #endif
+
+        useCode = googleTranslateTargetCode
+        if str(args.t).strip().lower() == "deepl":
+            useCode = deeplTranslateTargetCode
+        #end if
+
+        translateFile(translateFriendlyName, useCode, outputTargetCode)
     #end for
 #end def
 
