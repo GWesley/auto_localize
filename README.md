@@ -7,23 +7,20 @@ Auto translate `Localizable.strings` for multiple languages in Xcode using Googl
 3. `pip3 install --upgrade deepl`
 4. `python3 translate.py`
 ```
-usage: translate.py [-h] [-t T] [-a A] [-f F] [-o O] [-d D] [-v V]
+usage: translate.py [-h] [-t T] [-a A] [-f F] [-o O] [-d D] [-e E] [-v V]
 
 optional arguments:
   -h, --help  show this help message and exit
-  -t T        set the translator to use. -t deepl for DeepL, -t google for
-              Google Translate. Defaults to google. For DeepL must also
-              specify auth key with -a
+  -t T        set the translator to use. -t deepl for DeepL, -t google for Google Translate. Defaults to google. For DeepL
+              must also specify auth key with -a
   -a A        set auth key to use for DeepL
-  -f F        set the path to the original Localizable.strings to read keys
-              from
+  -f F        set the path to the original Localizable.strings to read keys from
   -o O        set the origin locale for auto translation, default is english
-  -d D        For delta translations. Set the path to the root directory where
-              existing localized translations exist. If specified, this path
-              will be used to check if a line / key has already been
-              translated and skip translating that line. This way only the
-              keys that do not exist in the existing destination file will be
-              translated.
+  -d D        For delta translations. Set the path to the root directory where existing localized translations exist. If
+              specified, this path will be used to check if a line / key has already been translated and skip translating
+              that line. This way only the keys that do not exist in the existing destination file will be translated.
+  -e E        emulate only. This will not perform any translation but instead emulate and print out details of strings that
+              would need to be translated.
   -v V        Verbose
 ```
 
