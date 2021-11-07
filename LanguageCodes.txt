@@ -1,6 +1,5 @@
 # Country Coding mapping
 # Name  |  Google Country Code (translate API)  | iOS Country Code (.lproj directory name)
-English en en
 French	fr fr
 German	de de
 ChineseSimplified	zh-CN zh-Hans
