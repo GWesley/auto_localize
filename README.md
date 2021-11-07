@@ -57,7 +57,7 @@ This will then ignore translating any line that already exists.
 This will print additional information as it translates.
 `python3 translate.py -v`
 
-# extract_missing_strings.py
+# extract_missing_strings
 
 We already have tools that extract missing localizable strings from code. However, at times you end up with partially incomplete translations
 across the different translations you support. For instance
@@ -71,3 +71,9 @@ that were found in your default locale's `Localizable.strings` file.
 This way your default locale's `Localizable.strings` file remains the source of truth. You can then
 use `translate.py` to translate any string from this file that does not exist in one of the supported languages, 
 using the `-d` option to translate only the missing strings.
+
+Usage:
+
+`python3 extract_missing_strings.py -p ~/path/to/app/resources`
+
+The output will be stored under `output/en.lproj/Localizable.strings`
