@@ -1,11 +1,12 @@
 #!/usr/bin/python3
-import re
+import argparse
 import os
 import os.path
-import argparse
+
 import deepl
-import codecs, chardet
 from googletrans import Translator
+
+from functions import readTranslations, writeTranslationToFile, clearContentsOfFile
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", default="google", help="set the translator to use. -t deepl for DeepL, -t google for Google Translate. Defaults to google. For DeepL must also specify auth key with -a ")
@@ -13,112 +14,13 @@ parser.add_argument("-a", default="", help="set auth key to use for DeepL")
 parser.add_argument("-f", default="Localizable.strings", help="set the path to the original Localizable.strings to read keys from")
 parser.add_argument("-o", default="en", help="set the origin locale for auto translation, default is english")
 parser.add_argument("-d", default="", help="For delta translations. Set the path to the root directory where existing localized translations exist. If specified, this path will be used to check if a line / key has already been translated and skip translating that line. This way only the keys that do not exist in the existing destination file will be translated.")
+parser.add_argument("-e", default="0", help="emulate only. This will not perform any translation but instead emulate and print out details of strings that would need to be translated.")
 parser.add_argument("-v", default="1", help="Verbose")
 args = parser.parse_args()
 
-format_encoding = 'UTF-16'
-
-def createOutputDirectoryIfNotExists(fileName):
-    if not os.path.exists(os.path.dirname(fileName)):
-        os.makedirs(os.path.dirname(fileName))
-    #end if
-#end def
-
-def _unescape_key(s):
-    return s.replace('\\\n', '')
-#end def
-
-def _unescape(s):
-    s = s.replace('\\\n', '')
-    return s.replace('\\"', '"').replace(r'\n', '\n').replace(r'\r', '\r')
-#end def
-
-def _get_content_from_file(filename, encoding='UTF-16'):
-    f = open(filename, 'rb')
-    try:
-        content = f.read()
-        if chardet.detect(content)['encoding'].startswith(format_encoding):
-            #f = f.decode(format_encoding)
-            encoding = format_encoding
-        else:
-            #f = f.decode(default_encoding)
-            encoding = 'utf-8'
-        f.close()
-        f = codecs.open(filename, 'r', encoding=encoding)
-        return f.read()
-    except IOError as e:
-        print("Error opening file %s with encoding %s: %s" %\
-                (filename, format_encoding, e.message))
-    except Exception as e:
-        print("Unhandled exception: %s" % e.message)
-    finally:
-        f.close()
-
-def readTranslations(fileName):
-    """
-    Read in a given Localizable.strings file and return a list of key / value pairs read for each line of translation.
-
-    :param fileName:
-    :return: List of tuples with key / value pairs of each translation found
-    """
-
-    print("Reading Localizable.strings from path: %s" % (fileName))
-    if not os.path.exists(fileName):
-        print(" ... no file found, returning empty translation")
-        return []
-    #endif
-
-    stringset = []
-    f = _get_content_from_file(filename=fileName)
-    if f.startswith(u'\ufeff'):
-        f = f.lstrip(u'\ufeff')
-    #end if
-    # regex for finding all comments in a file
-    cp = r'(?:/\*(?P<comment>(?:[^*]|(?:\*+[^*/]))*\**)\*/)'
-    p = re.compile(
-        r'(?:%s[ \t]*[\n]|[\r\n]|[\r]){0,1}(?P<line>(("(?P<key>[^"\\]*(?:\\.[^"\\]*)*)")|(?P<property>\w+))\s*=\s*"(?P<value>[^"\\]*(?:\\.[^"\\]*)*)"\s*;)' % cp,
-        re.DOTALL | re.U)
-    # c = re.compile(r'\s*/\*(.|\s)*?\*/\s*', re.U)
-    c = re.compile(r'//[^\n]*\n|/\*(?:.|[\r\n])*?\*/', re.U)
-    ws = re.compile(r'\s+', re.U)
-    end = 0
-    start = 0
-    for i in p.finditer(f):
-        start = i.start('line')
-        end_ = i.end()
-        key = i.group('key')
-        comment = i.group('comment') or ''
-
-        if not key:
-            key = i.group('property')
-        #end if
-
-        value = i.group('value')
-        while end < start:
-            m = c.match(f, end, start) or ws.match(f, end, start)
-            if not m or m.start() != end:
-                print("Invalid syntax: %s" % f[end:start])
-            #end if
-            end = m.end()
-        #end while
-        end = end_
-        key = _unescape_key(key)
-        stringset.append({'key': key, 'value': _unescape(value), 'comment': comment})
-    return stringset
-#end def
-
-def writeToFile(sourceText, translatedText, outputTargetCode):
-    outputFileName = "output/" + outputTargetCode + ".lproj/Localizable.strings"
-    with open(outputFileName, "a", encoding="utf-8") as myfile:
-        createOutputDirectoryIfNotExists(outputFileName)
-        contentToWrite = "\"" + sourceText + "\" = \"" + translatedText + "\";\n"
-        myfile.write(contentToWrite)
-    #end with
-#end def
-
 def translateSourceText(sourceText, translateTargetCode):
     """
-    Return translation for source text
+    Return translation for source text using Google / DeepL
     :param sourceText: source text to translate
     :param translateTargetCode: target language (google translation code)
     :return:
@@ -127,7 +29,9 @@ def translateSourceText(sourceText, translateTargetCode):
     translatedText = sourceText
 
     try:
-        if str(args.t).strip().lower() == "deepl":
+        if str(args.e).strip().lower() == "1":
+            pass
+        elif str(args.t).strip().lower() == "deepl":
             deeplTranslator = deepl.Translator(args.a)
             result = deeplTranslator.translate_text(sourceText, source_lang=args.o, target_lang=translateTargetCode)
 
@@ -197,16 +101,15 @@ def translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
 
     if success:
         # Only save translated lines
-        writeToFile(stringName, translation, outputTargetCode)
+        if str(args.e).strip().lower() == "1":
+            # Emulating only
+            pass
+        else:
+            writeTranslationToFile(stringName, translation, outputTargetCode)
+        #end if
     #end if
 
     return success
-#end def
-
-def clearContentsOfFile(target):
-    fileName = "output/" + target + ".lproj/Localizable.strings"
-    createOutputDirectoryIfNotExists(fileName)
-    open(fileName, 'w').close()
 #end def
 
 def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
@@ -226,7 +129,10 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
     if len(args.d.strip()) != 0:
         fullExistingPath = os.path.expanduser(args.d.strip())
 
-        pathToExistingFile = fullExistingPath + "/" + outputTargetCode + ".lproj/Localizable.strings"
+        pathToExistingFile = os.path.join(fullExistingPath, outputTargetCode + ".lproj/Localizable.strings")
+
+        print("Reading existing Localizable.strings from path: %s" % (pathToExistingFile))
+
         existingOutputTranslations = readTranslations(pathToExistingFile)
 
         print("  ... will only translate new keys. Existing translations found: %s keys" % (len(existingOutputTranslations)))
@@ -295,7 +201,7 @@ with open('LanguageCodes.txt', 'r') as supportedLangCodeFile:
 
         translateFile(translateFriendlyName, useCode, outputTargetCode)
 
-        print("\n\n")
+        print("\n")
     #end for
 #end def
 
