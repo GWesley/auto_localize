@@ -58,10 +58,11 @@ def translateSourceText(sourceText, translateTargetCode):
         if args.v == '1':
             print("\n  ..... !! FAILED !! to translate for %s: %s = %s\n" % (translateTargetCode, sourceText, e))
         #endif
-        return (sourceText, False)
+        return (sourceText, False, False)
     #end try
 
     # Deepl can produce translations with double quotes, we need to escape those properly
+    translatedText = translatedText.replace('\\N', '\\n')
     translatedText = translatedText.replace('\\"', '"')
     translatedText = translatedText.replace("\"", "\\\"")
 
@@ -73,7 +74,7 @@ def translateSourceText(sourceText, translateTargetCode):
         print("\n  ..... !! WARNING !! Formatters don't match in: %s => %s (lang: %s)\n" % (sourceText, translatedText, translateTargetCode))
     #end if
 
-    return (translatedText, True)
+    return (translatedText, True, True)
 #end def
 
 def translationNeeded(translationTuple, translateTargetCode, existingTranslations):
@@ -115,7 +116,7 @@ def translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
         stringComment = ""
     #end if
 
-    (translation, success) = translateSourceText(sourceText, translateTargetCode)
+    (translation, success, warning) = translateSourceText(sourceText, translateTargetCode)
 
     if success:
         # Only save translated lines
@@ -127,7 +128,7 @@ def translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
         #end if
     #end if
 
-    return success
+    return (success, warning)
 #end def
 
 def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
@@ -159,11 +160,13 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
     totalLinesTranslated = 0
     totalLinesNeeded = 0
     totalSkipped = 0
+    totalWarnings = 0
     for translationTuple in originLines:
         if translationNeeded(translationTuple, translateTargetCode, existingOutputTranslations):
             totalLinesNeeded += 1
 
-            if translateLineInFile(translationTuple, translateTargetCode, outputTargetCode):
+            (success, warning) = translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
+            if success:
                 totalLinesTranslated += 1
             #end if
         else:
@@ -174,8 +177,12 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
         #end if
     #end for
 
+    if totalWarnings != 0:
+        print("ERROR: CHECK WARNINGS. Total reported %s" % (totalWarnings))
+    #end if
+
     if totalLinesNeeded != totalLinesTranslated:
-        print("WARNING: Total lines translated for %s: %s. Original source count: %s" % (translateFriendlyName, totalLinesTranslated, totalLinesNeeded))
+        print("ERROR: NOT ALL LINES TRANSLATED. Total lines translated for %s: %s. Original source count: %s" % (translateFriendlyName, totalLinesTranslated, totalLinesNeeded))
     else:
         if len(args.d.strip()) != 0:
             print("SUCCESS: New lines translated for %s: %s, skipped: %s" % (translateFriendlyName, totalLinesTranslated, totalSkipped))
