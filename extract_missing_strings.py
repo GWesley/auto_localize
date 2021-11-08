@@ -112,9 +112,15 @@ pathToSave = "Localizable.strings"
 clearContentsOfFile(originLangKey)
 
 print("Saving missing localizations")
-for missingTrans in missingLines:
+totalLinesWritten = 0
+for missingTrans in sorted(missingLines, key = lambda i: str(i['key']).lower()):
     stringName = missingTrans['key']
     stringVal = missingTrans['value']
+    stringComment = missingTrans['comment']
+
+    if not stringComment:
+        stringComment = ""
+    #end if
 
     # ignore if the key already exists in the original locale
     inOrigin = False
@@ -130,5 +136,9 @@ for missingTrans in missingLines:
         continue
     #end if
 
-    writeTranslationToFile(stringName, stringName, originLangKey)
+    writeTranslationToFile(stringName, stringName, stringComment, originLangKey)
+
+    totalLinesWritten += 1
 #end for
+
+print("Total lines written: %s, already in origin: %s" % (totalLinesWritten, len(missingLines)-totalLinesWritten))

@@ -96,6 +96,11 @@ def translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
     """
     stringName = translationTuple['key']
     sourceText = translationTuple['value']
+    stringComment = translationTuple['comment']
+
+    if not stringComment:
+        stringComment = ""
+    #end if
 
     (translation, success) = translateSourceText(sourceText, translateTargetCode)
 
@@ -105,7 +110,7 @@ def translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
             # Emulating only
             pass
         else:
-            writeTranslationToFile(stringName, translation, outputTargetCode)
+            writeTranslationToFile(stringName, translation, stringComment, outputTargetCode)
         #end if
     #end if
 

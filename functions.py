@@ -65,8 +65,9 @@ def _unescape_key(s):
 #end def
 
 def _unescape(s):
-    s = s.replace('\\\n', '')
-    return s.replace('\\"', '"').replace(r'\n', '\n').replace(r'\r', '\r')
+    return _unescape_key(s)
+    # s = s.replace('\\\n', '')
+    # return s.replace('\\"', '"').replace(r'\n', '\n').replace(r'\r', '\r')
 #end def
 
 def _get_content_from_file(filename, encoding='UTF-16'):
@@ -97,12 +98,26 @@ def createOutputDirectoryIfNotExists(fileName):
     #end if
 #end def
 
-def writeTranslationToFile(sourceText, translatedText, outputTargetCode):
+def writeCommentToFile(comment, outputTargetCode):
     outputFileName = os.path.join("output", outputTargetCode + ".lproj/Localizable.strings")
 
     with open(outputFileName, "a", encoding="utf-8") as myfile:
         createOutputDirectoryIfNotExists(outputFileName)
-        contentToWrite = "\"" + sourceText + "\" = \"" + translatedText + "\";\n"
+        contentToWrite = "/* " + comment + " */\n\n"
+        myfile.write(contentToWrite)
+    #end with
+#end def
+
+def writeTranslationToFile(sourceText, translatedText, comment, outputTargetCode):
+    outputFileName = os.path.join("output", outputTargetCode + ".lproj/Localizable.strings")
+
+    with open(outputFileName, "a", encoding="utf-8") as myfile:
+        createOutputDirectoryIfNotExists(outputFileName)
+        contentToWrite = ""
+        if len(comment) != 0:
+            contentToWrite = "/* " + comment + " */\n"
+        #end if
+        contentToWrite += "\"" + sourceText + "\" = \"" + translatedText + "\";\n\n"
         myfile.write(contentToWrite)
     #end with
 #end def

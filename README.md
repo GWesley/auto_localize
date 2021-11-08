@@ -26,7 +26,7 @@ optional arguments:
 
 **NOTE**: Strings that cannot be translated are not copied over to the output directory. This way you
 get a chance to correct / modify the original string and try again. When used with the `-d` option, this means that 
-it will only try and translate the missing strings (i.e. the strings that failed to translate the firs time.)
+it will only try and translate the missing strings (i.e. the strings that failed to translate the first time.)
 
 ## how to specify custom path to Localizable.strings
 `python3 translate.py -f /some/path/to/Localizable.strings`
