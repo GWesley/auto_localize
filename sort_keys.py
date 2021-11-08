@@ -69,6 +69,10 @@ for line in sorted(mismatchedTranslationLines, key = lambda i: str(i['key']).low
         stringComment = ""
     #end if
 
+    # lint
+    stringVal = stringVal.replace("％", "%")
+    stringVal = stringVal.replace("% @", "%@")
+
     writeTranslationToFile(stringName, stringVal, stringComment, originLangKey)
 
     # Some basic validation to confirm translation did not get rid of formatters in source text
@@ -95,6 +99,10 @@ for line in sorted(normalLines, key = lambda i: str(i['key']).lower()):
         stringComment = ""
     #end if
 
+    # lint
+    stringVal = stringVal.replace("％", "%")
+    stringVal = stringVal.replace("% @", "%@")
+
     writeTranslationToFile(stringName, stringVal, stringComment, originLangKey)
 
     # Some basic validation to confirm translation did not get rid of formatters in source text
@@ -110,7 +118,9 @@ for line in sorted(normalLines, key = lambda i: str(i['key']).lower()):
 #end for
 
 if formatMisMatch > 0:
-    print("ERROR: Total mismatched formatters found: %s" % (formatMisMatch))
+    # This may be okay since the string name itself may not have any formatters, but worth pointing out
+    # in case the keys and values are the same
+    print("WARN: Total mismatched formatters found: %s" % (formatMisMatch))
 #endif
 if totalLinesWritten != len(originLines):
     print("ERROR: Total lines written do NOT match total lines read - %s != %s" % (totalLinesWritten, len(originLines)))

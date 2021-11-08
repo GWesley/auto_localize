@@ -103,7 +103,7 @@ def writeCommentToFile(comment, outputTargetCode):
 
     with open(outputFileName, "a", encoding="utf-8") as myfile:
         createOutputDirectoryIfNotExists(outputFileName)
-        contentToWrite = "/* " + comment + " */\n\n"
+        contentToWrite = "/* " + comment.strip() + " */\n\n"
         myfile.write(contentToWrite)
     #end with
 #end def
@@ -115,7 +115,7 @@ def writeTranslationToFile(sourceText, translatedText, comment, outputTargetCode
         createOutputDirectoryIfNotExists(outputFileName)
         contentToWrite = ""
         if len(comment) != 0:
-            contentToWrite = "/* " + comment + " */\n"
+            contentToWrite = "/* " + comment.strip() + " */\n"
         #end if
         contentToWrite += "\"" + sourceText + "\" = \"" + translatedText + "\";\n\n"
         myfile.write(contentToWrite)
