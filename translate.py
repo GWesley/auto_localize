@@ -15,7 +15,7 @@ parser.add_argument("-f", default="Localizable.strings", help="set the path to t
 parser.add_argument("-o", default="en", help="set the origin locale for auto translation, default is english")
 parser.add_argument("-d", default="", help="For delta translations. Set the path to the root directory where existing localized translations exist. If specified, this path will be used to check if a line / key has already been translated and skip translating that line. This way only the keys that do not exist in the existing destination file will be translated.")
 parser.add_argument("-e", default="0", help="emulate only. This will not perform any translation but instead emulate and print out details of strings that would need to be translated.")
-parser.add_argument("-v", default="1", help="Verbose")
+parser.add_argument("-v", default="0", help="Verbose")
 args = parser.parse_args()
 
 def translateSourceText(sourceText, translateTargetCode):
