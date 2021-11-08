@@ -86,11 +86,15 @@ for line in sorted(mismatchedTranslationLines, key = lambda i: str(i['key']).low
         stringName, stringVal))
     #end if
 
-    if stringVal.find('%') != -1 and stringVal[stringVal.find('%') + 1] not in ['u', 'l', '@', 'f', '1', '2', '3', 'd', '.']:
+    formatterIndex = stringVal.find('%')
+    if formatterIndex != -1 and formatterIndex + 1 >= len(stringVal):
         formatMisMatch += 1
 
-        print("\n  ..... !! WARNING !! Invalid formatter in: %s => %s\n" % (
-            stringName, stringVal))
+        print("\n  ..... !! WARNING !! Invalid formatter in: %s => %s\n" % (stringName, stringVal))
+    elif formatterIndex != -1 and len(stringVal) != formatterIndex and stringVal[formatterIndex + 1] not in ['u', 'l', '@', 'f', '1', '2', '3', 'd', '.']:
+        formatMisMatch += 1
+
+        print("\n  ..... !! WARNING !! Invalid formatter in: %s => %s\n" % (stringName, stringVal))
     # end if
 
 #end for
@@ -124,11 +128,15 @@ for line in sorted(normalLines, key = lambda i: str(i['key']).lower()):
     #end if
 
 
-    if stringVal.find('%') != -1 and stringVal[stringVal.find('%') + 1] not in ['u', 'l', '@', 'f', '1', '2', '3', 'd', '.']:
+    formatterIndex = stringVal.find('%')
+    if formatterIndex != -1 and formatterIndex + 1 >= len(stringVal):
         formatMisMatch += 1
 
-        print("\n  ..... !! WARNING !! Invalid formatter in: %s => %s\n" % (
-            stringName, stringVal))
+        print("\n  ..... !! WARNING !! Invalid formatter in: %s => %s\n" % (stringName, stringVal))
+    elif formatterIndex != -1 and len(stringVal) != formatterIndex and stringVal[formatterIndex + 1] not in ['u', 'l', '@', 'f', '1', '2', '3', 'd', '.']:
+        formatMisMatch += 1
+
+        print("\n  ..... !! WARNING !! Invalid formatter in: %s => %s\n" % (stringName, stringVal))
     # end if
 #end for
 
