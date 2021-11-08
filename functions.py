@@ -55,8 +55,8 @@ def readTranslations(fileName):
             end = m.end()
         #end while
         end = end_
-        key = _unescape_key(key)
-        stringset.append({'key': key, 'value': _unescape(value), 'comment': comment})
+        #key = _unescape_key(key)
+        stringset.append({'key': key, 'value': value, 'comment': comment})
     return stringset
 #end def
 

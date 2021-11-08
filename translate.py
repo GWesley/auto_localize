@@ -30,21 +30,33 @@ def translateSourceText(sourceText, translateTargetCode):
 
     try:
         if str(args.e).strip().lower() == "1":
+            if args.v == "1":
+                print("  ..... Translating in Emulation: %s" % (sourceText))
+            #end if
+
             pass
         elif str(args.t).strip().lower() == "deepl":
             deeplTranslator = deepl.Translator(args.a)
             result = deeplTranslator.translate_text(sourceText, source_lang=args.o, target_lang=translateTargetCode)
 
             translatedText = result.text
+
+            if args.v == "1":
+                print("  ..... Translated with DeepL: %s => %s" % (sourceText, translatedText))
+            #end if
         else:
             googleTranslator = Translator()
             obj = googleTranslator.translate(sourceText, src=args.o, dest=translateTargetCode)
 
             translatedText = obj.text
+
+            if args.v == "1":
+                print("  ..... Translated with Google: %s => %s" % (sourceText, translatedText))
+            #end if
         #end if
     except Exception as e:
         if args.v == '1':
-            print("   FAILED to translate for %s: %s = %s" % (translateTargetCode, sourceText, e))
+            print("\n  ..... !! FAILED !! to translate for %s: %s = %s\n" % (translateTargetCode, sourceText, e))
         #endif
         return (sourceText, False)
     #end try
@@ -58,7 +70,7 @@ def translateSourceText(sourceText, translateTargetCode):
     totalFormattersInOutput = translatedText.count('%')
 
     if totalFormattersInSource != totalFormattersInOutput:
-        print("    WARNING. Formatters don't match in: %s => %s (lang: %s)" % (sourceText, translatedText, translateTargetCode))
+        print("\n  ..... !! WARNING !! Formatters don't match in: %s => %s (lang: %s)\n" % (sourceText, translatedText, translateTargetCode))
     #end if
 
     return (translatedText, True)
@@ -157,7 +169,7 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
         else:
             totalSkipped += 1
             if args.v == "1":
-                print("  ....... skipping already translated key: %s" % (translationTuple['key']))
+                print("  ........... skipping already translated key: %s" % (translationTuple['key']))
             #end if
         #end if
     #end for
