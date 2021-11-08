@@ -70,11 +70,13 @@ def translateSourceText(sourceText, translateTargetCode):
     totalFormattersInSource = sourceText.count('%')
     totalFormattersInOutput = translatedText.count('%')
 
+    formatterFailed = False
     if totalFormattersInSource != totalFormattersInOutput:
+        formatterFailed = True
         print("\n  ..... !! WARNING !! Formatters don't match in: %s => %s (lang: %s)\n" % (sourceText, translatedText, translateTargetCode))
     #end if
 
-    return (translatedText, True, True)
+    return (translatedText, True, formatterFailed)
 #end def
 
 def translationNeeded(translationTuple, translateTargetCode, existingTranslations):
