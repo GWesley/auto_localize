@@ -50,6 +50,7 @@ def translateSourceText(sourceText, translateTargetCode):
     #end try
 
     # Deepl can produce translations with double quotes, we need to escape those properly
+    translatedText = translatedText.replace('\\"', '"')
     translatedText = translatedText.replace("\"", "\\\"")
 
     # Some basic validation to confirm translation did not get rid of formatters in source text
