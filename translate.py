@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 import argparse
 import os
 import os.path
@@ -65,6 +66,8 @@ def translateSourceText(sourceText, translateTargetCode):
     translatedText = translatedText.replace('\\N', '\\n')
     translatedText = translatedText.replace('\\"', '"')
     translatedText = translatedText.replace("\"", "\\\"")
+    translatedText = translatedText.replace("％", "%")
+    translatedText = translatedText.replace("% @", "%@")
 
     # Some basic validation to confirm translation did not get rid of formatters in source text
     totalFormattersInSource = sourceText.count('%')
@@ -74,6 +77,10 @@ def translateSourceText(sourceText, translateTargetCode):
     if totalFormattersInSource != totalFormattersInOutput:
         formatterFailed = True
         print("\n  ..... !! WARNING !! Formatters don't match in: %s => %s (lang: %s)\n" % (sourceText, translatedText, translateTargetCode))
+    elif translatedText.count('% ') != sourceText.count('% '):
+        formatterFailed = True
+        print("\n  ..... !! WARNING !! Formatters have an invalid space: %s => %s (lang: %s)\n" % (
+        sourceText, translatedText, translateTargetCode))
     #end if
 
     return (translatedText, True, formatterFailed)

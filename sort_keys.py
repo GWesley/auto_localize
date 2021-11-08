@@ -59,6 +59,7 @@ for originLine in originLines:
     # end if
 # end for
 
+formatMisMatch = 0
 for line in sorted(mismatchedTranslationLines, key = lambda i: str(i['key']).lower()):
     stringName = line['key']
     stringVal = line['value']
@@ -69,6 +70,18 @@ for line in sorted(mismatchedTranslationLines, key = lambda i: str(i['key']).low
     #end if
 
     writeTranslationToFile(stringName, stringVal, stringComment, originLangKey)
+
+    # Some basic validation to confirm translation did not get rid of formatters in source text
+    totalFormattersInSource = stringName.count('%')
+    totalFormattersInOutput = stringVal.count('%')
+
+    if totalFormattersInSource != totalFormattersInOutput:
+        formatMisMatch += 1
+
+        print("\n  ..... !! WARNING !! Formatters don't match in: %s => %s\n" % (
+        stringName, stringVal))
+    #end if
+
 #end for
 
 writeCommentToFile("-------", originLangKey)
@@ -83,10 +96,24 @@ for line in sorted(normalLines, key = lambda i: str(i['key']).lower()):
     #end if
 
     writeTranslationToFile(stringName, stringVal, stringComment, originLangKey)
+
+    # Some basic validation to confirm translation did not get rid of formatters in source text
+    totalFormattersInSource = stringName.count('%')
+    totalFormattersInOutput = stringVal.count('%')
+
+    if totalFormattersInSource != totalFormattersInOutput:
+        formatMisMatch += 1
+
+        print("\n  ..... !! WARNING !! Formatters don't match in: %s => %s\n" % (
+        stringName, stringVal))
+    #end if
 #end for
 
+if formatMisMatch > 0:
+    print("ERROR: Total mismatched formatters found: %s" % (formatMisMatch))
+#endif
 if totalLinesWritten != len(originLines):
-    print("WARNING: Total lines written do NOT match total lines read - %s != %s" % (totalLinesWritten, len(originLines)))
+    print("ERROR: Total lines written do NOT match total lines read - %s != %s" % (totalLinesWritten, len(originLines)))
 #end if
 
 print("Done")
