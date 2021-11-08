@@ -169,6 +169,9 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
             if success:
                 totalLinesTranslated += 1
             #end if
+            if warning:
+                totalWarnings += 1
+            #end if
         else:
             totalSkipped += 1
             if args.v == "1":

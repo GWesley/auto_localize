@@ -4,6 +4,8 @@ import os.path
 
 from functions import readTranslations, clearContentsOfFile, writeTranslationToFile, writeCommentToFile
 
+#TODO: Auto remove duplicate key / value pairs and report duplicates where their values don't match
+
 # Sorts keys that don't match with their translations to the top of the file. Most of the times the base strings
 # file will have lines such as:
 # "done" = "done";
