@@ -72,8 +72,11 @@ for line in sorted(mismatchedTranslationLines, key = lambda i: str(i['key']).low
     #end if
 
     # lint
+    stringVal = stringVal.replace("（", " (")
+    stringVal = stringVal.replace("）", ") ")
     stringVal = stringVal.replace("％", "%")
     stringVal = stringVal.replace("% @", "%@")
+    stringVal = stringVal.replace("\\ n", "\n")
 
     writeTranslationToFile(stringsFileName, stringName, stringVal, stringComment, originLangKey)
 
@@ -113,8 +116,11 @@ for line in sorted(normalLines, key = lambda i: str(i['key']).lower()):
     #end if
 
     # lint
+    stringVal = stringVal.replace("（", " (")
+    stringVal = stringVal.replace("）", ")")
     stringVal = stringVal.replace("％", "%")
     stringVal = stringVal.replace("% @", "%@")
+    stringVal = stringVal.replace("\\ n", "\n")
 
     writeTranslationToFile(stringsFileName, stringName, stringVal, stringComment, originLangKey)
 

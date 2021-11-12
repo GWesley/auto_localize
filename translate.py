@@ -68,6 +68,11 @@ def translateSourceText(sourceText, translateTargetCode):
     translatedText = translatedText.replace("\"", "\\\"")
     translatedText = translatedText.replace("％", "%")
     translatedText = translatedText.replace("% @", "%@")
+    translatedText = translatedText.replace("（", " (")
+    translatedText = translatedText.replace("）", ") ")
+    translatedText = translatedText.replace("% @", "%@")
+    translatedText = translatedText.replace("\\ n", "\n")
+    translatedText = translatedText.strip(' ')
 
     # Some basic validation to confirm translation did not get rid of formatters in source text
     totalFormattersInSource = sourceText.count('%')
