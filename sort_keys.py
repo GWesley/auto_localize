@@ -19,19 +19,21 @@ from functions import readTranslations, clearContentsOfFile, writeTranslationToF
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", default="", help="set the path to the root directory where all the localized translations reside (i.e. directory with `fr.lproj` etc)")
+parser.add_argument("-f", default="Localizable.strings", help="set the name of the .strings file to look for")
 parser.add_argument("-o", default="en", help="set the origin locale for to extract missing translations from, default is english")
 args = parser.parse_args()
 
 # Read and cache origin language once
 resourcePath = os.path.expanduser(args.p.strip())
 originLangKey = args.o.strip()
-originPath = os.path.join(resourcePath, originLangKey + ".lproj/Localizable.strings")
+stringsFileName = os.path.expanduser(args.f.strip())
+originPath = os.path.join(resourcePath, originLangKey + os.path.join(".lproj", stringsFileName))
 
 print("Reading source language: %s" % (originPath))
 
 originLines = readTranslations(originPath)
 
-clearContentsOfFile(originLangKey)
+clearContentsOfFile(stringsFileName, originLangKey)
 
 print("Sorting localizations")
 totalLinesWritten = 0
@@ -73,7 +75,7 @@ for line in sorted(mismatchedTranslationLines, key = lambda i: str(i['key']).low
     stringVal = stringVal.replace("％", "%")
     stringVal = stringVal.replace("% @", "%@")
 
-    writeTranslationToFile(stringName, stringVal, stringComment, originLangKey)
+    writeTranslationToFile(stringsFileName, stringName, stringVal, stringComment, originLangKey)
 
     # Some basic validation to confirm translation did not get rid of formatters in source text
     totalFormattersInSource = stringName.count('%')
@@ -99,7 +101,7 @@ for line in sorted(mismatchedTranslationLines, key = lambda i: str(i['key']).low
 
 #end for
 
-writeCommentToFile("-------", originLangKey)
+writeCommentToFile(stringsFileName, "-------", originLangKey)
 
 for line in sorted(normalLines, key = lambda i: str(i['key']).lower()):
     stringName = line['key']
@@ -114,7 +116,7 @@ for line in sorted(normalLines, key = lambda i: str(i['key']).lower()):
     stringVal = stringVal.replace("％", "%")
     stringVal = stringVal.replace("% @", "%@")
 
-    writeTranslationToFile(stringName, stringVal, stringComment, originLangKey)
+    writeTranslationToFile(stringsFileName, stringName, stringVal, stringComment, originLangKey)
 
     # Some basic validation to confirm translation did not get rid of formatters in source text
     totalFormattersInSource = stringName.count('%')

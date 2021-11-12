@@ -98,8 +98,8 @@ def createOutputDirectoryIfNotExists(fileName):
     #end if
 #end def
 
-def writeCommentToFile(comment, outputTargetCode):
-    outputFileName = os.path.join("output", outputTargetCode + ".lproj/Localizable.strings")
+def writeCommentToFile(stringsFileName, comment, outputTargetCode):
+    outputFileName = os.path.join("output", outputTargetCode + os.path.join(".lproj", stringsFileName))
 
     with open(outputFileName, "a", encoding="utf-8") as myfile:
         createOutputDirectoryIfNotExists(outputFileName)
@@ -108,8 +108,8 @@ def writeCommentToFile(comment, outputTargetCode):
     #end with
 #end def
 
-def writeTranslationToFile(sourceText, translatedText, comment, outputTargetCode):
-    outputFileName = os.path.join("output", outputTargetCode + ".lproj/Localizable.strings")
+def writeTranslationToFile(stringsFileName, sourceText, translatedText, comment, outputTargetCode):
+    outputFileName = os.path.join("output", outputTargetCode + os.path.join(".lproj", stringsFileName))
 
     with open(outputFileName, "a", encoding="utf-8") as myfile:
         createOutputDirectoryIfNotExists(outputFileName)
@@ -122,8 +122,8 @@ def writeTranslationToFile(sourceText, translatedText, comment, outputTargetCode
     #end with
 #end def
 
-def clearContentsOfFile(target):
-    fileName = os.path.join("output", target + ".lproj/Localizable.strings")
+def clearContentsOfFile(stringsFileName, target):
+    fileName = os.path.join("output", target + os.path.join(".lproj", stringsFileName))
 
     createOutputDirectoryIfNotExists(fileName)
     open(fileName, 'w').close()

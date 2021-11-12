@@ -9,18 +9,20 @@ from functions import readTranslations, clearContentsOfFile, writeTranslationToF
 # the default locale).
 #
 # This script helps with this. It scans all supported languages, including your default locale (english if not specified), for
-# any string which was not found in other translations. It then extracts only the keys and stores them into Localizable.strings
+# any string which was not found in other translations. It then extracts only the keys and stores them into Localizable.strings for each language
 # These can then be translated for all languages using translate.py with the -d option, which would ignore all existing translations.
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", default="", help="set the path to the root directory where all the localized translations reside (i.e. directory with `fr.lproj` etc)")
+parser.add_argument("-f", default="Localizable.strings", help="set the name of the .strings file to look for")
 parser.add_argument("-o", default="en", help="set the origin locale for to extract missing translations from, default is english")
 args = parser.parse_args()
 
 # Read and cache origin language once
 resourcePath = os.path.expanduser(args.p.strip())
 originLangKey = args.o.strip()
-originPath = os.path.join(resourcePath, originLangKey + ".lproj/Localizable.strings")
+stringsFileName = os.path.expanduser(args.f.strip())
+originPath = os.path.join(resourcePath, originLangKey + os.path.join(".lproj", stringsFileName))
 
 if not os.path.exists(originPath):
     print("Path not found: %s" % (originPath))
@@ -57,7 +59,7 @@ for dirpath, dirnames, filenames in os.walk(resourcePath):
             dirLang = dirname.split(os.path.sep)[-1].replace(".lproj", "")
 
             if dirLang in supportedLanguageCodes:
-                localizablePath = os.path.join(os.path.join(dirpath, dirname), "Localizable.strings")
+                localizablePath = os.path.join(os.path.join(dirpath, dirname), stringsFileName)
                 if not os.path.exists(localizablePath):
                     continue
                 #end if
@@ -71,7 +73,7 @@ for dirpath, dirnames, filenames in os.walk(resourcePath):
 missingLines = []
 missingKeys = []
 for supportedLangPath in supportedLanguagePaths:
-    print("Reading Localizable.strings from path: %s" % (supportedLangPath))
+    print("Reading %s from path: %s" % (stringsFileName, supportedLangPath))
 
     supportedLangLines = readTranslations(supportedLangPath)
 
@@ -108,8 +110,7 @@ for supportedLangPath in supportedLanguagePaths:
 
 print("Total missing strings found: %s" % (len(missingLines)))
 
-pathToSave = "Localizable.strings"
-clearContentsOfFile(originLangKey)
+clearContentsOfFile(stringsFileName, originLangKey)
 
 print("Saving missing localizations")
 totalLinesWritten = 0
@@ -136,7 +137,7 @@ for missingTrans in sorted(missingLines, key = lambda i: str(i['key']).lower()):
         continue
     #end if
 
-    writeTranslationToFile(stringName, stringName, stringComment, originLangKey)
+    writeTranslationToFile(stringsFileName, stringName, stringName, stringComment, originLangKey)
 
     totalLinesWritten += 1
 #end for

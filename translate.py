@@ -140,16 +140,17 @@ def translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
             # Emulating only
             pass
         else:
-            writeTranslationToFile(stringName, translation, stringComment, outputTargetCode)
+            writeTranslationToFile(stringsFileName, stringName, translation, stringComment, outputTargetCode)
         #end if
     #end if
 
     return (success, warning)
 #end def
 
-def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
+def translateFile(stringsFileName, translateFriendlyName, translateTargetCode, outputTargetCode):
     """
     Translate source language for the given target language / output file
+    :param stringsFileName: The .strings file name
     :param translateFriendlyName: friendly name for printing
     :param translateTargetCode: google translation target code
     :param outputTargetCode: output target code
@@ -157,14 +158,14 @@ def translateFile(translateFriendlyName, translateTargetCode, outputTargetCode):
     """
     print("Translating for: " + translateFriendlyName)
 
-    clearContentsOfFile(outputTargetCode)
+    clearContentsOfFile(stringsFileName, outputTargetCode)
 
     # When delta-translating, pre-load existing translations to compare against
     existingOutputTranslations = []
     if len(args.d.strip()) != 0:
         fullExistingPath = os.path.expanduser(args.d.strip())
 
-        pathToExistingFile = os.path.join(fullExistingPath, outputTargetCode + ".lproj/Localizable.strings")
+        pathToExistingFile = os.path.join(fullExistingPath, outputTargetCode + os.path.join(".lproj", stringsFileName))
 
         print("Reading existing Localizable.strings from path: %s" % (pathToExistingFile))
 
@@ -217,7 +218,9 @@ if str(args.t).strip().lower() == "deepl":
 
 # Read and cache origin language once
 originPath = os.path.expanduser(args.f.strip())
+dirName, stringsFileName = os.path.split(originPath)
 print("Reading source language: %s" % (originPath))
+print("Will use filename: %s" % (stringsFileName))
 
 originLines = readTranslations(originPath)
 
@@ -241,12 +244,12 @@ with open('LanguageCodes.txt', 'r') as supportedLangCodeFile:
             continue
         #endif
 
-        useCode = googleTranslateTargetCode
+        useLangCode = googleTranslateTargetCode
         if str(args.t).strip().lower() == "deepl":
-            useCode = deeplTranslateTargetCode
+            useLangCode = deeplTranslateTargetCode
         #end if
 
-        translateFile(translateFriendlyName, useCode, outputTargetCode)
+        translateFile(stringsFileName, translateFriendlyName, useLangCode, outputTargetCode)
 
         print("\n")
     #end for
