@@ -4,6 +4,9 @@ import os.path
 
 from functions import readTranslations, clearContentsOfFile, writeTranslationToFile
 
+# Finds missing strings, not present in the base / default translation, but exist in other translations. Copies these
+# back to the base translation.
+#
 # At times you end up with partially complete translations across the different translations you support. For instance
 # a string may be translated in French but not in Italian, and the same string may not even exist in en.lproj (assuming that's
 # the default locale).
