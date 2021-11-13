@@ -9,8 +9,8 @@ from functions import readTranslations, clearContentsOfFile, writeTranslationToF
 # the default locale).
 #
 # This script helps with this. It scans all supported languages, including your default locale (english if not specified), for
-# any string which was not found in other translations. It then extracts only the keys and stores them into Localizable.strings for each language
-# These can then be translated for all languages using translate.py with the -d option, which would ignore all existing translations.
+# any string which was not found in other translations. It then extracts only the keys and stores them into your base Localizable.strings.
+# These can then be translated for all languages using translate.py with the -d option (i.e. to perform an incremental, delta translation).
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", default="", help="set the path to the root directory where all the localized translations reside (i.e. directory with `fr.lproj` etc)")

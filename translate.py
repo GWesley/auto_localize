@@ -56,9 +56,8 @@ def translateSourceText(sourceText, translateTargetCode):
             #end if
         #end if
     except Exception as e:
-        if args.v == '1':
-            print("\n  ..... !! FAILED !! to translate for %s: %s = %s\n" % (translateTargetCode, sourceText, e))
-        #endif
+        print("\n  ..... !! FAILED !! to translate for %s: %s = %s\n" % (translateTargetCode, sourceText, e))
+
         return (sourceText, False, False)
     #end try
 
