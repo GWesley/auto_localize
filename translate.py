@@ -5,10 +5,12 @@ import os
 import os.path
 
 import deepl
-from googletrans import Translator
+import openai
 
-from functions import readTranslations, writeTranslationToFile, clearContentsOfFile
+openai.api_key = read_open_ai_token()
+# from googletrans import Translator
 
+from functions import readTranslations, writeTranslationToFile, clearContentsOfFile, read_open_ai_token
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", default="google", help="set the translator to use. -t deepl for DeepL, -t google for Google Translate. Defaults to google. For DeepL must also specify auth key with -a ")
 parser.add_argument("-a", default="", help="set auth key to use for DeepL")
@@ -19,7 +21,42 @@ parser.add_argument("-e", default="0", help="emulate only. This will not perform
 parser.add_argument("-v", default="0", help="Verbose")
 args = parser.parse_args()
 
-def translateSourceText(sourceText, translateTargetCode):
+
+def translate_text_with_context(text, source_lang, target_lang, context=None):
+
+    prompt = f" Translate the following text from {source_lang} to {target_lang}: {text}."
+    adPrompt = f" Your goal is to translate text, but not to change it's meaning. You can use the following context to help you: {context}. All your answers strictly target language. don't add a period at the end and don't capitalize it if it's the original text not with a capital letter"
+    if context:
+        prompt = f"{adPrompt}\n\n{prompt}"
+
+    if args.v == "2":
+        print("---------------------------------------------")
+        print("  ..... OpenAI Prompt: %s" % (prompt))
+        print("---------------------------------------------")
+    #end if
+
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        temperature=0,
+        max_tokens=1000,
+        stream=False,
+    )
+    if args.v == "2":
+        print("---------------------------------------------")
+        print("  ..... OpenAI response: %s" % (response))
+        print("---------------------------------------------")
+    #end if
+
+    if response.choices:
+        return response.choices[0].text.strip()
+    else:
+        return None
+    #end if
+#end def
+
+
+def translateSourceText(sourceText, translateTargetCode, context=None):
     """
     Return translation for source text using Google / DeepL
     :param sourceText: source text to translate
@@ -36,6 +73,14 @@ def translateSourceText(sourceText, translateTargetCode):
             #end if
 
             pass
+
+        elif str(args.t).strip().lower() == "openai":
+            result = translate_text_with_context(sourceText, "English", target_lang=translateTargetCode, context=context)
+            translatedText = result
+            if args.v == "1":
+                print("  ..... Translated with OpenAI: %s => %s" % (sourceText, translatedText))
+            #end if
+
         elif str(args.t).strip().lower() == "deepl":
             deeplTranslator = deepl.Translator(args.a)
             result = deeplTranslator.translate_text(sourceText, source_lang=args.o, target_lang=translateTargetCode)
@@ -136,7 +181,7 @@ def translateLineInFile(translationTuple, translateTargetCode, outputTargetCode)
         stringComment = ""
     #end if
 
-    (translation, success, warning) = translateSourceText(sourceText, translateTargetCode)
+    (translation, success, warning) = translateSourceText(sourceText, translateTargetCode, context=stringComment)
 
     if success:
         # Only save translated lines
@@ -161,8 +206,9 @@ def translateFile(stringsFileName, translateFriendlyName, translateTargetCode, o
     :return:
     """
     print("Translating for: " + translateFriendlyName)
-
-    clearContentsOfFile(stringsFileName, outputTargetCode)
+    if len(args.d.strip()) == 0:
+        clearContentsOfFile(stringsFileName, outputTargetCode)
+    #end if
 
     # When delta-translating, pre-load existing translations to compare against
     existingOutputTranslations = []
@@ -220,6 +266,10 @@ if str(args.t).strip().lower() == "deepl":
     print("Using DeepL translator")
 #endif
 
+if str(args.t).strip().lower() == "openai":
+    print("Using OpenAI translator")
+#endif
+
 # Read and cache origin language once
 originPath = os.path.expanduser(args.f.strip())
 dirName, stringsFileName = os.path.split(originPath)
@@ -251,6 +301,10 @@ with open('LanguageCodes.txt', 'r') as supportedLangCodeFile:
         useLangCode = googleTranslateTargetCode
         if str(args.t).strip().lower() == "deepl":
             useLangCode = deeplTranslateTargetCode
+        #end if
+
+        if str(args.t).strip().lower() == "openai":
+            useLangCode = translateFriendlyName
         #end if
 
         translateFile(stringsFileName, translateFriendlyName, useLangCode, outputTargetCode)
