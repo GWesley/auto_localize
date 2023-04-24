@@ -39,6 +39,7 @@ Google Translate is used by default. To switch to DeepL you must also specify an
 
 ## how to use OpenAI
 Open AI `text-davinci-003` traslate accuratelly with context from comments. Put token into `openai_token.txt` before use.
+`python3 translate.py -t openai`
 
 ## how to set origin languge
 you can use `-o` to set your origin language,
