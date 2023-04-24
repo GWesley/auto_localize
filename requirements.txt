@@ -1,0 +1,5 @@
+openai>=0.27.0
+chardet>=3.0.4
+googletrans==4.0.0rc1
+deepl>=1.14.0
+

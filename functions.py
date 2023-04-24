@@ -4,6 +4,7 @@ import codecs
 import os
 import os.path
 import re
+import shutil
 
 format_encoding = 'UTF-16'
 
@@ -37,6 +38,7 @@ def readTranslations(fileName):
     end = 0
     start = 0
     for i in p.finditer(f):
+        # print("Line: %s" % i)
         start = i.start('line')
         end_ = i.end()
         key = i.group('key')
@@ -56,6 +58,7 @@ def readTranslations(fileName):
         #end while
         end = end_
         #key = _unescape_key(key)
+        # print("Found key: %s, value: %s, comment: %s" % (key, value, comment))
         stringset.append({'key': key, 'value': value, 'comment': comment})
     return stringset
 #end def
@@ -70,18 +73,18 @@ def _unescape(s):
     # return s.replace('\\"', '"').replace(r'\n', '\n').replace(r'\r', '\r')
 #end def
 
-def _get_content_from_file(filename, encoding='UTF-16'):
+def _get_content_from_file(filename, format_encoding='UTF-16'):
     f = open(filename, 'rb')
     try:
         content = f.read()
-        if chardet.detect(content)['encoding'].startswith(format_encoding):
-            #f = f.decode(format_encoding)
+        detected_encoding = chardet.detect(content)['encoding']
+        if detected_encoding and detected_encoding.startswith(format_encoding):
             encoding = format_encoding
         else:
-            #f = f.decode(default_encoding)
             encoding = 'utf-8'
         f.close()
         f = codecs.open(filename, 'r', encoding=encoding)
+        print("Opening file with detected encoding: %s, with format encoding: %s, with encoding: %s" % (detected_encoding, format_encoding, encoding))
         return f.read()
     except IOError as e:
         print("Error opening file %s with encoding %s: %s" % (filename, format_encoding, e.message))
@@ -127,4 +130,22 @@ def clearContentsOfFile(stringsFileName, target):
 
     createOutputDirectoryIfNotExists(fileName)
     open(fileName, 'w').close()
+#end def
+
+# not used
+def copy_files():
+    src_dir = './output'
+    dest_dir = '../app/Male\ Sexual\ Energy'
+    for file in os.listdir(src_dir):
+        src_file = os.path.join(src_dir, file)
+        dest_file = os.path.join(dest_dir, file)
+        if os.path.exists(dest_file):
+            os.remove(dest_file)
+        shutil.copy(src_file, dest_dir)
+    print("All files from './output' have been copied and replaced to '../app' directory.")
+
+def read_open_ai_token():
+    with open('openai_token.txt', 'r') as myfile:
+        return myfile.read().replace('\n', '')
+    #end with
 #end def

@@ -1,11 +1,14 @@
 # Country Coding mapping
 # Name  |  Google Country Code (translate API)  | DeepL Country Code | iOS Country Code (.lproj directory name)
-French	fr fr fr
-German	de de de
+# French	fr fr fr
+# German	de de de
 Spanish	es es es
-Dutch	nl nl nl
-Portuguese	pt pt-pt pt
+#Portuguese	pt pt-pt pt-PT
 ChineseSimplified	zh-CN zh zh-Hans
-Japanese	ja ja ja
-Italian	it it it
+#Japanese	ja ja ja
+#Italian	it it it
 Korean ko - ko
+#Russian	ru ru ru
+Turkish	tr tr tr
+Indonesian	id id id
+Hindi   hi hi hi

@@ -3,16 +3,15 @@ Auto translate `Localizable.strings` for multiple languages in Xcode using Googl
 
 # Usage
 1. put your origin `Localizable.strings` file in folder
-2. `pip3 install googletrans==4.0.0-rc1`
-3. `pip3 install --upgrade deepl`
+2. `pip3 install -r requirements.txt`
 4. `python3 translate.py`
 ```
 usage: translate.py [-h] [-t T] [-a A] [-f F] [-o O] [-d D] [-e E] [-v V]
 
 optional arguments:
   -h, --help  show this help message and exit
-  -t T        set the translator to use. -t deepl for DeepL, -t google for Google Translate. Defaults to google. For DeepL
-              must also specify auth key with -a
+  -t T        To set the translator, use the -t option followed by 'deepl' for DeepL, 'google' for Google Translate,
+              or 'openai' for OpenAI. OpenAI allow you translate with context from comment. By default, the translator is set to use Google. If you want to use DeepL, you must also specify the authentication key with -a.
   -a A        set auth key to use for DeepL
   -f F        set the path to the original Localizable.strings to read keys from
   -o O        set the origin locale for auto translation, default is english
@@ -24,8 +23,10 @@ optional arguments:
   -v V        Verbose
 ```
 
-**NOTE**: Strings that cannot be translated are not copied over to the output directory. This way you
-get a chance to correct / modify the original string and try again. When used with the `-d` option, this means that 
+**NOTE1** Put OpenAI token into `openai_token.txt` before use.
+
+**NOTE2**: Strings that cannot be translated are not copied over to the output directory. This way you
+get a chance to correct / modify the original string and try again. When used with the `-d` option, this means that
 it will only try and translate the missing strings (i.e. the strings that failed to translate the first time.)
 
 ## how to specify custom path to Localizable.strings
@@ -35,6 +36,9 @@ it will only try and translate the missing strings (i.e. the strings that failed
 Google Translate is used by default. To switch to DeepL you must also specify an authentication token, like so:
 
 `python3 translate.py -t deepl -a AUTH_TOKEN_HERE`
+
+## how to use OpenAI
+Open AI `text-davinci-003` traslate accuratelly with context from comments. Put token into `openai_token.txt` before use.
 
 ## how to set origin languge
 you can use `-o` to set your origin language,
@@ -51,7 +55,7 @@ To translate only the strings that have not been translated already, you need to
 
 `python3 translate.py -d ~/path/to/app/resources`
 
-This will then ignore translating any line that already exists. 
+This will then ignore translating any line that already exists.
 
 ## how to enable verbose printing
 This will print additional information as it translates.
@@ -69,7 +73,7 @@ any string which was not found in another translation. It then extracts only the
 that were found in your default locale's `Localizable.strings` file.
 
 This way your default locale's `Localizable.strings` file remains the source of truth. You can then
-use `translate.py` to translate any string from this file that does not exist in one of the supported languages, 
+use `translate.py` to translate any string from this file that does not exist in one of the supported languages,
 using the `-d` option to translate only the missing strings.
 
 Usage:
