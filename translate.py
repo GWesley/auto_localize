@@ -5,6 +5,7 @@ import os
 import os.path
 
 import deepl
+from googletrans import Translator
 import openai
 
 # from googletrans import Translator
