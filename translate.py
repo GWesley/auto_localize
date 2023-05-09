@@ -143,8 +143,10 @@ def translateSourceText(sourceText, translateTargetCode, context=None):
         print("\n  ..... !! WARNING !! Formatters have an invalid space: %s => %s (lang: %s)\n" % (
             sourceText, translatedText, translateTargetCode))
     # end if
-
-    if translatedText.find('%') != -1 and translatedText[translatedText.find('%') + 1] not in ['u', 'l', '@', 'f', '1', '2', '3', 'd', '.']:
+    percent_index = translatedText.find('%')
+    if percent_index != -1 \
+            and len(translatedText) > percent_index + 1 \
+            and translatedText[translatedText.find('%') + 1] not in ['u', 'l', '@', 'f', '1', '2', '3', 'd', '.']:
         formatterFailed = True
 
         print("\n  ..... !! WARNING !! Invalid formatter: %s => %s (lang: %s)\n" % (

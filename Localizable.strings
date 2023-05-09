@@ -8,3 +8,5 @@
 
 "Hello" = "Hello";
 "World" = "World";
+"Battery %" = "Battery %";
+"%d Coins" = "%d Coins";
